@@ -8,6 +8,9 @@
     "test": {
       "cache": true
     },
+    "test:jest": {
+      "cache": true
+    },
     "lint": {
       "cache": true
     },

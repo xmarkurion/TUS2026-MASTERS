@@ -52,9 +52,14 @@ pipeline {
         
         stage('Test') {
             parallel {
-                stage('Test Frontend') {
+                stage('Test Frontend (Vitest)') {
                     steps {
                         sh 'npx nx test frontend'
+                    }
+                }
+                stage('Test Frontend (Jest)') {
+                    steps {
+                        sh 'npx nx test:jest frontend'
                     }
                 }
                 stage('Test Backend') {

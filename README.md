@@ -84,6 +84,8 @@ Storybook will be available at http://localhost:6006
 
 ## 🧪 Testing
 
+The frontend supports both Vitest and Jest test runners.
+
 ### Run all tests
 
 ```bash
@@ -95,10 +97,15 @@ npx nx run-many -t test
 ### Test specific project
 
 ```bash
-# Frontend
+# Frontend (Vitest - default)
 npm run test:frontend
 # or
 npx nx test frontend
+
+# Frontend (Jest)
+npm run test:frontend:jest
+# or
+npx nx test:jest frontend
 
 # Backend
 npm run test:backend
