@@ -5,7 +5,7 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/workspace:run-commands",
+      "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/target"],
       "options": {
         "command": "mvn clean package -DskipTests",
@@ -13,14 +13,14 @@
       }
     },
     "serve": {
-      "executor": "@nx/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "mvn spring-boot:run",
         "cwd": "apps/backend"
       }
     },
     "test": {
-      "executor": "@nx/workspace:run-commands",
+      "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/target/surefire-reports"],
       "options": {
         "command": "mvn test",
@@ -28,7 +28,7 @@
       }
     },
     "clean": {
-      "executor": "@nx/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "mvn clean",
         "cwd": "apps/backend"
