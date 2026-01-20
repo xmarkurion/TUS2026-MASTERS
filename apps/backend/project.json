@@ -1,0 +1,39 @@
+{
+  "name": "backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/backend/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/workspace:run-commands",
+      "outputs": ["{projectRoot}/target"],
+      "options": {
+        "command": "mvn clean package -DskipTests",
+        "cwd": "apps/backend"
+      }
+    },
+    "serve": {
+      "executor": "@nx/workspace:run-commands",
+      "options": {
+        "command": "mvn spring-boot:run",
+        "cwd": "apps/backend"
+      }
+    },
+    "test": {
+      "executor": "@nx/workspace:run-commands",
+      "outputs": ["{projectRoot}/target/surefire-reports"],
+      "options": {
+        "command": "mvn test",
+        "cwd": "apps/backend"
+      }
+    },
+    "clean": {
+      "executor": "@nx/workspace:run-commands",
+      "options": {
+        "command": "mvn clean",
+        "cwd": "apps/backend"
+      }
+    }
+  },
+  "tags": []
+}
