@@ -66,3 +66,8 @@ storybook-static
 tmp/
 temp/
 *.tmp
+
+# Deploy database folders (keep empty dirs)
+apps/deploy/db/*
+!apps/deploy/db/.gitkeep
+!apps/deploy/db_dump/.gitkeep
