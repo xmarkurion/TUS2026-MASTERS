@@ -10,6 +10,19 @@ const config: StorybookConfig = {
   docs: {
     autodocs: 'tag',
   },
+  async viteFinal(config) {
+    return {
+      ...config,
+      build: {
+        ...config.build,
+        sourcemap: false,
+      },
+      esbuild: {
+        ...config.esbuild,
+        sourcemap: false,
+      },
+    };
+  },
 };
 
 export default config;
