@@ -148,6 +148,12 @@ npx nx build-storybook frontend
 npm run lint
 # or
 npx nx run-many -t lint
+
+npm install --save-dev eslint-plugin-prettier
+npm run lint
+npm run lint -- --fix
+npm run lint
+
 ```
 
 ## 🔄 CI/CD
