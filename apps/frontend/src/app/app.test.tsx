@@ -16,6 +16,8 @@ describe('App (Jest)', () => {
 
   it('should display monorepo description', () => {
     const { getByText } = render(<App />);
-    expect(getByText(/Monorepo with Nx, Spring Boot, React, and Storybook/i)).toBeInTheDocument();
+    expect(
+      getByText(/Monorepo with Nx, Spring Boot, React, and Storybook/i)
+    ).toBeInTheDocument();
   });
 });

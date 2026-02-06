@@ -1,0 +1,23 @@
+{
+  "targets": {
+    "docker-up": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose up",
+        "cwd": "../.."
+      }
+    },
+    "db-backup": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -Command \"docker compose down; $db='apps/deploy/db'; $dumpDir='apps/deploy/db_dump'; if (-not (Test-Path $dumpDir)) { [void](New-Item -ItemType Directory -Path $dumpDir) }; $hasFiles = Get-ChildItem -Path $db -File -Recurse -Force -ErrorAction SilentlyContinue; if ($hasFiles -and $hasFiles.Count -gt 0) { $zip=Join-Path $dumpDir 'dump.zip'; if (Test-Path $zip) { Remove-Item $zip -Force }; Compress-Archive -Path (Join-Path $db '*') -DestinationPath $zip -Force } else { Write-Host 'DB folder empty; skipping zip' }\""
+      }
+    },
+    "db-restore": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -Command \"docker compose down; $db='apps/deploy/db'; $dump='apps/deploy/db_dump/dump.zip'; if (-not (Test-Path $db)) { [void](New-Item -ItemType Directory -Path $db) }; Remove-Item -Path (Join-Path $db '*') -Recurse -Force -ErrorAction SilentlyContinue; if (Test-Path $dump) { Expand-Archive -Path $dump -DestinationPath $db -Force } else { Write-Error 'dump.zip not found'; exit 1 }\""
+      }
+    }
+  }
+}
