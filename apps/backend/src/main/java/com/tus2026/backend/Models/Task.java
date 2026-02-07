@@ -5,18 +5,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "tasks")
+@Document(collection = "Tasks")
 public class Task {
 
    @Id
     private String id;
+    @Field("task_name")
     private String taskName;
+    @Field("difficulty")
     private Integer difficulty;
+    @Field("task_desc")
     private String taskDesc;
+    @Field("assignee_id")
     private String assigneeId; // reference to Employee id
+    @Field("effort")
     private int effort;
 }
