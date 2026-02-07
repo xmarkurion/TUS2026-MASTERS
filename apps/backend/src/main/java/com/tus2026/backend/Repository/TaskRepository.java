@@ -4,13 +4,8 @@ import com.tus2026.backend.Models.Task;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-import java.util.List;
-
 public interface TaskRepository extends MongoRepository<Task, String> {
 
     @Query("{taskName:'?0'}")
     Task findByName(String taskName);
-
-    @Query(value="{ '_id' : '?0' }", delete=true)
-    void deleteById(int id);
 }

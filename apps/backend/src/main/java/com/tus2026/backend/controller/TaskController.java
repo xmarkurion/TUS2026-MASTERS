@@ -28,13 +28,13 @@ public class TaskController {
         return repo.findAll();
     }
 
-    @GetMapping("findByName")
-    public Task getTaskByName(@RequestBody String name){
+    @GetMapping("/findByName")
+    public Task getTaskByName(@RequestParam String name){
         return repo.findByName(name);
     }
 
     @DeleteMapping("/delete/{id}")
-    public String deleteTask(@PathVariable int id){
+    public String deleteTask(@PathVariable String id){
         repo.deleteById(id);
 
         return "Deleted Successfully";
