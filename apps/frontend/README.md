@@ -23,11 +23,11 @@ npm run dev
 
 ## Deploy `gh-pages`
 
-- change `basenameProd` in `/vite.config.ts`
-- create deploy key `GITHUB_TOKEN` in github `/settings/keys`
+- configure the `VITE_BASE_URL` used in `/vite.config.ts` (e.g. via `.env` or GitHub Actions workflow env)
+- ensure the GitHub Actions workflow has permission to deploy (it can use the default `secrets.GITHUB_TOKEN` or a repo secret PAT)
 - commit and push changes code
 - setup gihub pages to branch `gh-pages`
-- run action `Build & Deploy`
+- run the GitHub Actions workflow (e.g. `Build & Deploy`)
 
 ### Auto Deploy
 
