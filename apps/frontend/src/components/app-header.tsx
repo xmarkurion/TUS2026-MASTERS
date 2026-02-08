@@ -36,7 +36,7 @@ export function AppHeader() {
                             {mainMenu.map((item, index) => (
                                 (item.items && item.items.length > 0) ? (
                                     <DropdownMenu key={index}>
-                                        <DropdownMenuTrigger className='focus-visible:outline-none'>
+                                        <DropdownMenuTrigger asChild>
                                             <NavLink
                                                 key={index}
                                                 to={item.url}
