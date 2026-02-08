@@ -1,7 +1,15 @@
-import { ComponentExample } from "@/components/component-example";
+import { BrowserRouter, HashRouter } from 'react-router'
+import { ThemeProvider } from './contexts/ThemeContext'
+import Router from './Router'
 
-export function App() {
-return <ComponentExample />;
+const AppRouter = import.meta.env.VITE_USE_HASH_ROUTE === 'true' ? HashRouter : BrowserRouter
+
+export default function App() {
+    return (
+        <ThemeProvider>
+            <AppRouter>
+                <Router />
+            </AppRouter>
+        </ThemeProvider>
+    )
 }
-
-export default App;
