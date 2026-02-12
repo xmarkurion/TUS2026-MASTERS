@@ -13,12 +13,12 @@ type AppConfigType = {
 export const appConfig: AppConfigType = {
   name: import.meta.env.VITE_APP_NAME ?? 'TaskFlow',
   github: {
-    title: 'React Shadcn Starter',
-    url: 'https://github.com/hayyi2/react-shadcn-starter',
+    title: 'AI Task Manager',
+    url: 'https://github.com/xmarkurion/TUS2026-MASTERS',
   },
   author: {
-    name: 'hayyi',
-    url: 'https://github.com/hayyi2/',
+    name: 'A00300334_A00316053_A00325738_A00279813',
+    url: 'https://github.com/xmarkurion/TUS2026-MASTERS',
   },
 };
 
