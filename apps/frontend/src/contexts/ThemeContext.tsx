@@ -1,63 +1,93 @@
-import { createContext, ReactNode, use, useEffect, useState } from "react"
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 type ThemeType = {
-    theme: string
-    setTheme: (theme: string) => void
-}
+  theme: string;
+  setTheme: (theme: string) => void;
+};
 
-export const ThemeContext = createContext<ThemeType | null>(null)
+export const ThemeContext = createContext<ThemeType | null>(null);
 
 export function ThemeProvider({
-    children,
-    defaultTheme = "system",
-    storageKey = "shadcn-ui-theme",
+  children,
+  defaultTheme = 'system',
+  storageKey = 'shadcn-ui-theme',
 }: {
-    children: ReactNode
-    defaultTheme?: string
-    storageKey?: string
+  children: ReactNode;
+  defaultTheme?: string;
+  storageKey?: string;
 }) {
-    const [theme, setTheme] = useState(
-        () => localStorage.getItem(storageKey) ?? defaultTheme
-    )
+  const [theme, setTheme] = useState(() => {
+    try {
+      if (
+        typeof window !== 'undefined' &&
+        window.localStorage &&
+        typeof window.localStorage.getItem === 'function'
+      ) {
+        return window.localStorage.getItem(storageKey) ?? defaultTheme;
+      }
+    } catch (e) {
+      // ignore and fall back to defaultTheme
+    }
 
-    useEffect(() => {
-        const root = window.document.documentElement
+    return defaultTheme;
+  });
 
-        root.classList.remove("light", "dark")
+  useEffect(() => {
+    const root = window.document.documentElement;
 
-        if (theme === "system") {
-            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-                .matches
-                ? "dark"
-                : "light"
+    root.classList.remove('light', 'dark');
 
-            root.classList.add(systemTheme)
-            return
-        }
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+        .matches
+        ? 'dark'
+        : 'light';
 
-        root.classList.add(theme)
-    }, [theme])
+      root.classList.add(systemTheme);
+      return;
+    }
 
-    return (
-        <ThemeContext
-            value={{
-                theme,
-                setTheme: (theme: string) => {
-                    localStorage.setItem(storageKey, theme)
-                    setTheme(theme)
-                },
-            }}>
-            {children}
-        </ThemeContext>
-    )
+    root.classList.add(theme);
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme: (theme: string) => {
+          try {
+            if (
+              typeof window !== 'undefined' &&
+              window.localStorage &&
+              typeof window.localStorage.setItem === 'function'
+            ) {
+              window.localStorage.setItem(storageKey, theme);
+            }
+          } catch (e) {
+            // ignore storage write errors
+          }
+
+          setTheme(theme);
+        },
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 export function useTheme(): ThemeType {
-    const context = use(ThemeContext)
+  const context = useContext(ThemeContext);
 
-    if (context === null) {
-        throw new Error("useTheme must be used within a ThemeProvider")
-    }
+  if (context === null) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
 
-    return context
+  return context;
 }

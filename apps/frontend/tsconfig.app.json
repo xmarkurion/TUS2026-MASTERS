@@ -21,7 +21,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-
+    "types": ["vitest/globals"],
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -29,5 +29,5 @@
       ]
     }
   },
-  "include": ["src"]
+  "include": ["src","src/vitest.setup.ts"]
 }
