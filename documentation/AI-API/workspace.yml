@@ -1,0 +1,14 @@
+opencollection: 1.0.0
+info:
+  name: "AI-API"
+  type: workspace
+
+collections:
+  - name: "Gemini-API"
+    path: "collections\\Gemini-API"
+  - name: "LM-Studio"
+    path: "collections\\LM-Studio"
+
+specs:
+
+docs: ''

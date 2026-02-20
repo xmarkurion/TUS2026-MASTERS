@@ -1,0 +1,26 @@
+info:
+  name: Gemma 3 4b
+  type: http
+  seq: 1
+
+http:
+  method: post
+  url: http://localhost:1234/api/v1/chat
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "model": "google/gemma-3-4b",
+        "system_prompt": "You answer only in rhymes.",
+        "input": "What is your favorite color?"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: false
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
