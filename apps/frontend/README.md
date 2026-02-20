@@ -71,6 +71,10 @@ react-shadcn-starter/
 └── vite.config.ts # Vite configuration
 ```
 
+## Credit
+- configuration of vite video https://youtu.be/4WuOZDiYJCc
+
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/hayyi2/react-shadcn-starter/blob/main/LICENSE) file for details.
