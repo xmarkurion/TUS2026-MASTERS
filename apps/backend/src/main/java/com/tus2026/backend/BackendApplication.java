@@ -1,13 +1,15 @@
 package com.tus2026.backend;
 
+import com.tus2026.backend.Models.Status;
 import com.tus2026.backend.Models.Task;
+import com.tus2026.backend.Models.TaskDifficulty;
 import com.tus2026.backend.Repository.TaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import java.util.List;
 import java.util.Scanner;
 
 @SpringBootApplication
@@ -17,17 +19,14 @@ public class BackendApplication{
         SpringApplication.run(BackendApplication.class, args);
     }
 
-    @Autowired
-    private TaskRepository repository;
-
 
     //Console test for basic CRUD Operations with Tasks
-    @Bean
-    public CommandLineRunner run(TaskRepository repo) {
-        return args -> {
+        @Bean
+        public CommandLineRunner run(TaskRepository repo) {
+            return args -> {
 
-            Scanner scanner = new Scanner(System.in);
-            int choice = -1;
+                Scanner scanner = new Scanner(System.in);
+                int choice = -1;
 
             while (choice != 0) {
                 System.out.println("\n===== TASK CRUD MENU =====");
@@ -47,8 +46,8 @@ public class BackendApplication{
                         System.out.print("Task name: ");
                         t.setTaskName(scanner.nextLine());
 
-                        System.out.print("Difficulty: ");
-                        t.setDifficulty(Integer.parseInt(scanner.nextLine()));
+                        System.out.print("Difficulty (EASY, MEDIUM, HARD): ");
+                        t.setDifficulty(TaskDifficulty.valueOf(scanner.nextLine().toLowerCase()));
 
                         System.out.print("Description: ");
                         t.setTaskDesc(scanner.nextLine());
@@ -58,6 +57,8 @@ public class BackendApplication{
 
                         System.out.print("Effort: ");
                         t.setEffort(Integer.parseInt(scanner.nextLine()));
+
+                        t.setStatus(Status.TODO);
 
                         repo.save(t);
                         System.out.println("Saved!");
@@ -70,10 +71,10 @@ public class BackendApplication{
                     case 3:
                         System.out.print("Enter task name: ");
                         String name = scanner.nextLine();
-                        Task found = repo.findByName(name);
+                        List<Task> found = repo.findByTaskNameContainingIgnoreCase(name);
 
-                        if (found != null) {
-                            System.out.println(found);
+                        if (!found.isEmpty()) {
+                            found.forEach(System.out::println);
                         } else {
                             System.out.println("Not found.");
                         }

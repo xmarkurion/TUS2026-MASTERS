@@ -24,13 +24,12 @@ public class TaskController {
 
     @GetMapping("/findAllTasks")
     public List<Task> getTasks() {
-
         return repo.findAll();
     }
 
     @GetMapping("/findByName")
-    public Task getTaskByName(@RequestParam String name){
-        return repo.findByName(name);
+    public List<Task> getTaskByName(@RequestParam String name){
+        return repo.findByTaskNameContainingIgnoreCase(name);
     }
 
     @DeleteMapping("/delete/{id}")
