@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @plugin "tailwindcss-animate";
 
@@ -118,4 +118,29 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Startup page scalable styles */
+:root {
+  --startup-scale: 1; /* default, override where needed */
+}
+
+.startup-scale {
+  --startup-scale: 4.4; /* change this to adjust sizing (1.4 = +40%) */
+}
+
+.startup-scale .startup-title {
+  font-size: calc(1.125rem * var(--startup-scale));
+}
+
+.startup-scale .startup-button {
+  font-size: calc(0.875rem * var(--startup-scale));
+  padding: calc(0.5rem * var(--startup-scale)) calc(1rem * var(--startup-scale));
+}
+
+/* Scalable textarea for startup page */
+.startup-scale .startup-textarea {
+  width: 100%;
+  max-width: calc(36rem * var(--startup-scale)); /* adjustable max width */
+  min-width: calc(20rem * var(--startup-scale));
 }

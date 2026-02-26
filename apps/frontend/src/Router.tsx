@@ -4,7 +4,8 @@ import NotMatch from './pages/NotMatch';
 import Sample from './pages/Sample';
 import ComingSoon from './pages/ComingSoon';
 import TaskBoard from './pages/TaskBoard';
-import StartupPage from './pages/StartupPage';
+import StartupPage from './pages/Startup';
+import TaskCreation from './pages/TaskCreation';
 
 export default function Router() {
   return (
@@ -12,6 +13,7 @@ export default function Router() {
       <Route element={<AppLayout />}>
         <Route path="" element={<StartupPage />} />
         <Route path="pages">
+          <Route path="taskcreation" element={<TaskCreation />} />
           <Route path="taskboard" element={<TaskBoard />} />
           <Route path="sample" element={<Sample />} />
           <Route path="feature" element={<ComingSoon />} />
