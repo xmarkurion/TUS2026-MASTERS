@@ -1,0 +1,25 @@
+info:
+  name: Add task
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:8080/tasks/addTask
+  body:
+    type: json
+    data: |2-
+        {
+          "taskName": "fix aaaaaa",
+          "difficulty": 3,
+          "taskDesc": "fix",
+          "assigneeId": "emp",
+          "effort": 2
+        }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

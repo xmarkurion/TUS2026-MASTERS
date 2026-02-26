@@ -1,1 +1,4 @@
 name: Gemini
+variables:
+  - name: key
+    value: AFDSFdsafdsafdsafdsafdsafdsaf
