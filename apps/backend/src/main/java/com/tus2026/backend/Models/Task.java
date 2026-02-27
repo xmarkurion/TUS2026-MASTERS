@@ -35,7 +35,7 @@ public class Task {
     @LastModifiedDate
     private Instant updatedAt;
     @Field("status")
-    private Status status;
+    private Status status=Status.TODO;
 }
 
 

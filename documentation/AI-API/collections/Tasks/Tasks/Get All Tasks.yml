@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:8080/tasks/
+  url: http://localhost:8080/tasks/findAllTasks
   auth: inherit
 
 settings:

@@ -5,7 +5,7 @@ info:
 
 http:
   method: PUT
-  url: http://localhost:8080/tasks/update/{$id}
+  url: http://localhost:8080/tasks/update/{{id}}
   headers:
     - name: Content-Type
       value: application/json
@@ -14,9 +14,9 @@ http:
     data: |-
       {
         "taskName": "Dont Implement back door",
-        "difficulty": "hard",
-        "taskDesc": "Kill application",
-        "assigneeId": "EMP-001",
+        "difficulty": "easy",
+        "taskDesc": "Dont Kill application",
+        "assigneeId": "EMP-002",
         "effort": 8,
         "status": "IN_PROGRESS"
       }

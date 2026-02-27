@@ -10,11 +10,10 @@ http:
     type: json
     data: |-
       {
-      "taskName": "Implement back door",
+        "taskName": "Implement back door",
         "difficulty": "hard",
         "taskDesc": "Kill application",
-        "assigneeId": "EMP-001",
-        "effort": 8
+        "effort": 0
       }
   auth: inherit
 
