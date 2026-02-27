@@ -26,6 +26,22 @@ public class TaskController {
     public List<Task> getTasks() {
         return repo.findAll();
     }
+    @PutMapping("/update/{id}")
+    public String updateTask(@PathVariable String id, @RequestBody Task task){
+        Task existingTask = repo.findById(id).orElse(null);
+        if (existingTask != null) {
+            existingTask.setTaskName(task.getTaskName());
+            existingTask.setDifficulty(task.getDifficulty());
+            existingTask.setTaskDesc(task.getTaskDesc());
+            existingTask.setAssigneeId(task.getAssigneeId());
+            existingTask.setEffort(task.getEffort());
+            existingTask.setStatus(task.getStatus());
+            repo.save(existingTask);
+            return "Updated Successfully";
+        } else {
+            return "Task not found";
+        }
+    }
 
     @GetMapping("/findByName")
     public List<Task> getTaskByName(@RequestParam String name){

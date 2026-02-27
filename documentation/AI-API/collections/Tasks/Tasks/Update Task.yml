@@ -1,0 +1,34 @@
+info:
+  name: Update Task
+  type: http
+  seq: 1
+
+http:
+  method: PUT
+  url: http://localhost:8080/tasks/update/{$id}
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "taskName": "Dont Implement back door",
+        "difficulty": "hard",
+        "taskDesc": "Kill application",
+        "assigneeId": "EMP-001",
+        "effort": 8,
+        "status": "IN_PROGRESS"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: id
+      value: 69a0df8c2143eb51264fb442
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
