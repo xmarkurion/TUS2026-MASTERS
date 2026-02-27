@@ -14,7 +14,7 @@ http:
     data: |-
       {
         "model": "google/gemma-3-4b",
-        "system_prompt": "you answer only in json structure.",
+        "system_prompt": "You answer only in rhymes.",
         "input": "What is your favorite color?"
       }
   auth: inherit
