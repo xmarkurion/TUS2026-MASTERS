@@ -1,0 +1,29 @@
+info:
+  name: Generate Tasks from Epic
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:8080/agents/tasks/generate
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "epicDescription": "Add a user authentication system where users can register with email and password, login to get a JWT token, and access protected routes using that token"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: baseurl
+      value: http://localhost:8080/tasks/agents
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
