@@ -1,26 +1,27 @@
-export type TaskStatus =
-  | 'TODO'
-  | 'IN_PROGRESS'
-  | 'IN_REVIEW'
-  | 'BLOCKED'
-  | 'DONE';
+// export type TaskStatus =
+//   | 'TODO'
+//   | 'IN_PROGRESS'
+//   | 'IN_REVIEW'
+//   | 'BLOCKED'
+//   | 'DONE';
 
-export type TaskDifficulty = 'easy' | 'medium' | 'hard' | null;
+// export type TaskDifficulty = 'easy' | 'medium' | 'hard' | null;
 
-export interface Tasks {
-  id: string;
-  title: string;
-  description: string;
+// export interface Tasks {
+//   id: string;
+//   title: string;
+//   description: string;
 
-  status: TaskStatus;
+//   status: TaskStatus;
 
-  createdAt: string;
-  updatedAt: string;
+//   createdAt: string;
+//   updatedAt: string;
 
-  difficulty?: TaskDifficulty;
-  assigneeId?: string | null;
-  effort?: number; // story points / hours
-}
+//   difficulty?: TaskDifficulty;
+//   assigneeId?: string | null;
+//   effort?: number; // story points / hours
+// }
+// Moved to src/types/task.ts for better organization and reusability across the app.
 
 export interface User {
   _id: string;
