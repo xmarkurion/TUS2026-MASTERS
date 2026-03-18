@@ -45,7 +45,7 @@ public class TaskBreakdownAgent {
               {
                 "taskName": "short, clear task title",
                 "taskDesc": "detailed description with acceptance criteria",
-                "difficulty": "EASY" | "MEDIUM" | "HARD",
+                "difficulty": "easy" | "medium" | "hard",
                 "effort": <integer — estimated hours>,
                 "status": "TODO"
               }

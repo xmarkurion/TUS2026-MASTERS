@@ -21,6 +21,8 @@ public class TaskBreakdownTools {
     // more
     // robust than just checking the names of the tasks, maybe we can use embeddings
     // to check similarity between task descriptions and existing tasks
+    // need some observability on which tool is being called and what it returns to
+    // debug and improve the agent's reasoning process
 
     public TaskBreakdownTools(TaskRepository taskRepository,
             ProjectContextRepository projectContextRepository) {
