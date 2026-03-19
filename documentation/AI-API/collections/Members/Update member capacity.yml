@@ -1,0 +1,26 @@
+info:
+  name: Update member capacity
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: http://localhost:8080/members/updatecapacity/{{id}}
+  body:
+    type: json
+    data: |-
+      {
+          "availableCapacity": 4
+        }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: id
+      value: 69bb4f60c0f74a4c63d20ddd
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

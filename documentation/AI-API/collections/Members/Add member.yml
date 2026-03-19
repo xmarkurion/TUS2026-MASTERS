@@ -1,0 +1,30 @@
+info:
+  name: Add member
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: http://localhost:8080/members/addMember
+  body:
+    type: json
+    data: |-
+      {
+          "name": "joui",
+          "position": "Backend Developer",
+          "personalBackground": "Full stack developer focused on AI-powered systems.",
+          "skills": [
+            "Java",
+            "Spring Boot",
+            "MongoDB",
+            "React"
+          ],
+          "availableCapacity": 6
+        },
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
