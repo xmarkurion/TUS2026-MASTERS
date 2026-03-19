@@ -1,0 +1,36 @@
+info:
+  name: Update member
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: http://localhost:8080/members/update/{{id}}
+  body:
+    type: json
+    data: |-
+      {
+          "name": "joui",
+          "position": "Full Srack Developer",
+          "personalBackground": "Full stack developer focused on Finance systems.",
+          "skills": [
+            "Java",
+            "Spring Boot",
+            "MongoDB",
+            "React",
+            "Vue"
+          ],
+          "availableCapacity": 6
+        }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: id
+      value: 69bb4f60c0f74a4c63d20ddd
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
