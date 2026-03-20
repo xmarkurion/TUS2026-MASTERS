@@ -21,6 +21,10 @@ export const mainMenu: MenuType = [
 
     items: [
       {
+        title: 'Task List',
+        url: '/pages/taskslist',
+      },
+      {
         title: 'Task Board',
         url: '/pages/taskboard',
       },
