@@ -11,4 +11,6 @@ public interface TaskRepository extends MongoRepository<Task, String> {
 
     Task findByTaskName(String taskName);
     List<Task> findByTaskNameContainingIgnoreCase(String taskName);
+    List<Task> findByAssigneeIdIsNull();
+    List<Task> findByAssigneeId(String assigneeId);
 }
