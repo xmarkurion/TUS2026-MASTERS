@@ -1,16 +1,14 @@
 package com.tus2026.backend.agents;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tus2026.backend.Models.Status;
 import com.tus2026.backend.Models.Task;
 import com.tus2026.backend.Models.TaskDifficulty;
 import com.tus2026.backend.Repository.TaskRepository;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,7 +17,17 @@ public class TaskBreakdownAgent {
     private final ChatClient chatClient;
     private final TaskBreakdownTools taskBreakdownTools;
     private final TaskRepository taskRepository;
-    private final ObjectMapper objectMapper;
+
+    /**
+     * Minimal DTO the LLM populates — avoids MongoDB annotations on Task
+     * interfering with Spring AI's structured output deserialization.
+     */
+    private record TaskDto(
+            String taskName,
+            String taskDesc,
+            String difficulty,
+            int effort
+    ) {}
 
     private static final String SYSTEM_PROMPT = """
             You are a senior software engineering tech lead and project manager.
@@ -39,93 +47,55 @@ public class TaskBreakdownAgent {
             5. Break the feature into tasks, one per concern
             6. Estimate effort (hours) and difficulty for each task
 
-            OUTPUT RULES — CRITICAL:
-            - Return ONLY a raw JSON array. No explanation, no markdown, no code fences.
-            - Each task object must have exactly these fields:
-              {
-                "taskName": "short, clear task title",
-                "taskDesc": "detailed description with acceptance criteria",
-                "difficulty": "easy" | "medium" | "hard",
-                "effort": <integer — estimated hours>,
-                "status": "TODO"
-              }
+            RULES:
             - Each task should represent 1–8 hours of work
             - Do not duplicate existing tasks
             - Generate between 3 and 10 tasks depending on feature complexity
+            - difficulty must be exactly one of: easy, medium, hard
+            - effort must be an integer (hours)
             """;
 
     public TaskBreakdownAgent(ChatClient.Builder chatClientBuilder,
             TaskBreakdownTools taskBreakdownTools,
-            TaskRepository taskRepository,
-            ObjectMapper objectMapper) {
-        // Attach tools to the ChatClient at build time
+            TaskRepository taskRepository) {
+        // Build with system prompt only — tools attached per prompt call to avoid duplication
         this.chatClient = chatClientBuilder
                 .defaultSystem(SYSTEM_PROMPT)
-                .defaultTools(taskBreakdownTools)
                 .build();
         this.taskBreakdownTools = taskBreakdownTools;
         this.taskRepository = taskRepository;
-        this.objectMapper = objectMapper;
     }
 
     /**
-     * Main entry point — takes a plain text feature description,
-     * runs the agent, parses the response, saves and returns tasks.
+     * Runs the agent, deserializes structured output directly into TaskDto records,
+     * maps to Task entities, saves and returns them.
      */
     public List<Task> generateTasksForEpic(String featureDescription) {
-        // Run the agent — it will autonomously call tools and reason before responding
-        String agentResponse = chatClient
+        List<TaskDto> dtos = chatClient
                 .prompt()
+                .tools(taskBreakdownTools)
                 .user(featureDescription)
                 .call()
-                .content();
+                .entity(new ParameterizedTypeReference<List<TaskDto>>() {});
 
-        // Parse the JSON response into Task entities
-        List<Task> tasks = parseAgentResponse(agentResponse);
+        List<Task> tasks = dtos.stream().map(dto -> {
+            Task task = new Task();
+            task.setTaskName(dto.taskName());
+            task.setTaskDesc(dto.taskDesc());
+            task.setEffort(dto.effort());
+            task.setStatus(Status.TODO);
+            task.setDifficulty(parseDifficulty(dto.difficulty()));
+            return task;
+        }).toList();
 
-        // Save all generated tasks to MongoDB
         return taskRepository.saveAll(tasks);
-    }
-
-    private List<Task> parseAgentResponse(String response) {
-        try {
-            // Strip markdown code fences if the model added them despite instructions
-            String cleaned = response
-                    .replaceAll("```json", "")
-                    .replaceAll("```", "")
-                    .trim();
-
-            // Parse JSON array into raw maps first for safe field extraction
-            List<java.util.Map<String, Object>> rawTasks = objectMapper.readValue(
-                    cleaned,
-                    new TypeReference<>() {
-                    });
-
-            List<Task> tasks = new ArrayList<>();
-            for (var raw : rawTasks) {
-                Task task = new Task();
-                task.setTaskName((String) raw.getOrDefault("taskName", "Untitled Task"));
-                task.setTaskDesc((String) raw.getOrDefault("taskDesc", ""));
-                task.setEffort(raw.containsKey("effort")
-                        ? Integer.parseInt(raw.get("effort").toString())
-                        : 0);
-                task.setStatus(Status.TODO);
-                task.setDifficulty(parseDifficulty(
-                        (String) raw.getOrDefault("difficulty", "MEDIUM")));
-                tasks.add(task);
-            }
-            return tasks;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse agent response into tasks. Raw response: " + response, e);
-        }
     }
 
     private TaskDifficulty parseDifficulty(String value) {
         try {
             return TaskDifficulty.valueOf(value.toUpperCase());
         } catch (Exception e) {
-            return TaskDifficulty.medium; // safe default
+            return TaskDifficulty.medium;
         }
     }
 }

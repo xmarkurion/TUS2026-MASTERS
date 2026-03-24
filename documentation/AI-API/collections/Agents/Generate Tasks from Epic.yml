@@ -13,7 +13,7 @@ http:
     type: json
     data: |-
       {
-        "epicDescription": "Add a user authentication system where users can register with email and password, login to get a JWT token, and access protected routes using that token"
+        "epicDescription": "Design and implement a complete user authentication and account management system for the application. The system should allow users to securely register, log in, and manage their account details while ensuring high standards of security, usability, and performance.The registration process must include validation for email format, password strength, and duplicate account detection. Passwords should be securely hashed before storage. Upon successful registration, users should be able to log in using their credentials.The login system should authenticate users and generate a secure token (e.g., JWT) to manage sessions. Proper error handling must be implemented for invalid credentials, expired sessions, and unauthorized access attempts.The frontend should provide intuitive and responsive user interfaces for registration and login, including form validation, error messages, and loading states. Accessibility and responsive design principles must be followed.Additionally, the system should include protected routes that only authenticated users can access. Middleware should be implemented to validate tokens and enforce authorization rules.Comprehensive testing must be carried out, including unit tests for backend logic, integration tests for authentication flows, and UI tests for frontend interactions."
       }
   auth: inherit
 
