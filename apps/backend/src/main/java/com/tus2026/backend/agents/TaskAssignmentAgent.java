@@ -65,8 +65,9 @@ public class TaskAssignmentAgent {
                                         .stream().limit(BATCH_SIZE).toList()).isEmpty()) {
 
                                 turnNumber++;
-
-                                // Pre-flight: is there anyone with capacity >= the smallest task's effort?
+                                // Checks if we have any memeber with capacity >= the minimum effort task in the
+                                // batch before calling the agent, to avoid unnecessary LLM calls when we know
+                                // no assignments can be made
                                 int minEffort = batch.stream().mapToInt(Task::getEffort).min().orElse(1);
                                 boolean anyoneAvailable = memberRepository.findAll().stream()
                                                 .anyMatch(m -> m.getAvailableCapacity() >= minEffort);
@@ -77,9 +78,6 @@ public class TaskAssignmentAgent {
                                                         .data("No suitable people found: no member has sufficient capacity for the remaining tasks."));
                                         break;
                                 }
-
-                                // Use .content() — lets the LLM call tools freely without structured output
-                                // instructions interfering with tool calling on small local models
                                 chatClient
                                                 .prompt()
                                                 .tools(taskAssignmentTools)
@@ -87,7 +85,6 @@ public class TaskAssignmentAgent {
                                                 .call()
                                                 .content();
 
-                                // Reasons captured by the tool during tool execution
                                 Map<String, String> reasons = taskAssignmentTools.getAndClearReasonLog();
 
                                 if (reasons.isEmpty()) {
@@ -98,7 +95,6 @@ public class TaskAssignmentAgent {
                                         break;
                                 }
 
-                                // Build results from DB state — ground truth, not LLM text output
                                 List<AssignmentResult> batchResults = reasons.entrySet().stream()
                                                 .map(entry -> {
                                                         String taskId = entry.getKey();
