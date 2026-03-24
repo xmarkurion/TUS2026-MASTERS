@@ -5,7 +5,12 @@ info:
 
 http:
   method: POST
-  url: http://localhost:8080/tasks/agents/tasks
+  url: http://localhost:8080/agents/tasks/assign/stream
+  headers:
+    - name: Accept
+      value: text/event-stream
+    - name: Cache-Control
+      value: no-cache
   auth: inherit
 
 settings:
