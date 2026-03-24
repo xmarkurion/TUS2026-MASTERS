@@ -6,6 +6,7 @@ import ComingSoon from './pages/ComingSoon';
 import TaskBoard from './pages/TaskBoard';
 import StartupPage from './pages/Startup';
 import TaskCreation from './pages/TaskCreation';
+import TaskList from './pages/TaskList';
 
 export default function Router() {
   return (
@@ -13,6 +14,7 @@ export default function Router() {
       <Route element={<AppLayout />}>
         <Route path="" element={<StartupPage />} />
         <Route path="pages">
+          <Route path="taskslist" element={<TaskList />} />
           <Route path="taskcreation" element={<TaskCreation />} />
           <Route path="taskboard" element={<TaskBoard />} />
           <Route path="sample" element={<Sample />} />
