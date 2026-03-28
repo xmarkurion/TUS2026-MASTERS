@@ -10,6 +10,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 
+import { Link } from 'react-router-dom';
 import { mainMenu } from '@/config/menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
@@ -25,10 +26,19 @@ export function AppSidebar() {
               <SidebarMenu>
                 {/* Parent item */}
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    {group.icon && <group.icon />}
-                    {group.title}
-                  </SidebarMenuButton>
+                  {group.items ? (
+                    <SidebarMenuButton>
+                      {group.icon && <group.icon />}
+                      {group.title}
+                    </SidebarMenuButton>
+                  ) : (
+                    <SidebarMenuButton asChild>
+                      <Link to={group.url}>
+                        {group.icon && <group.icon />}
+                        {group.title}
+                      </Link>
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
 
                 {/* Child items */}

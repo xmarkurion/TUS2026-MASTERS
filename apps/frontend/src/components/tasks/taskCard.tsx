@@ -3,8 +3,11 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Task } from '@/types/task';
 import { UserMock } from '@/lib/testData';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import { cn } from '@/lib/utils';
 
-export function TaskCard({ task }: { task: Task }) {
+export function TaskCardContent({ task }: { task: Task }) {
   const assignee = UserMock.find((u) => u._id === task.assigneeId);
 
   return (
@@ -24,23 +27,41 @@ export function TaskCard({ task }: { task: Task }) {
               <Avatar className="h-6 w-6">
                 <AvatarFallback>{assignee.personName[0]}</AvatarFallback>
               </Avatar>
-              <span className="text-muted-foreground">
-                {assignee.personName}
-              </span>
+              <span className="text-muted-foreground">{assignee.personName}</span>
             </div>
           </div>
         )}
         <div>
           <span className="flex justify-between text-muted-foreground text-xs">
-            <span>
-              Created: {new Date(task.createdAt).toLocaleDateString()}
-            </span>
-            <span>
-              Updated: {new Date(task.updatedAt).toLocaleDateString()}
-            </span>
+            <span>Created: {new Date(task.createdAt).toLocaleDateString()}</span>
+            <span>Updated: {new Date(task.updatedAt).toLocaleDateString()}</span>
           </span>
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+export function TaskCard({ task }: { task: Task }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({ id: task.id });
+
+  const style = transform
+    ? { transform: CSS.Translate.toString(transform) }
+    : undefined;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={cn(
+        'cursor-grab active:cursor-grabbing',
+        isDragging && 'opacity-40',
+      )}
+    >
+      <TaskCardContent task={task} />
+    </div>
   );
 }

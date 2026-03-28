@@ -1,4 +1,4 @@
-import { Brain, Settings, LucideIcon } from 'lucide-react';
+import { Brain, Settings, Wand2, LucideIcon } from 'lucide-react';
 
 type MenuItemType = {
   title: string;
@@ -14,6 +14,11 @@ export const mainMenu: MenuType = [
     title: 'AI Dashboard',
     url: '/',
     icon: Brain,
+  },
+  {
+    title: 'Generate Tasks',
+    url: '/pages/taskcreation',
+    icon: Wand2,
   },
   {
     title: 'Workspace',

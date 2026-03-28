@@ -12,15 +12,37 @@ export const taskService = {
           'Content-Type': 'application/json',
         },
       });
-      // Check if the response is successful if not throw an error
       if (!response.ok) {
         throw new Error('Failed to fetch tasks');
       }
-    //   console.log('API Response:', await response.clone().json());
       return await response.json();
     } catch (error) {
       console.error('Error fetching tasks:', error);
       throw error;
     }
+  },
+
+  generateTasks: async (epicDescription: string): Promise<Task[]> => {
+    const response = await fetch(`${API_BASE_URL}/agents/tasks/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ epicDescription }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to generate tasks');
+    }
+    return await response.json();
+  },
+
+  updateTask: async (taskId: string, task: Task): Promise<Task> => {
+    const response = await fetch(`${API_BASE_URL}/tasks/update/${taskId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(task),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update task');
+    }
+    return await response.json();
   },
 };

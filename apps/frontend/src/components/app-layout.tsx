@@ -9,9 +9,7 @@ import { AppSidebar } from './layout/sidebar';
  */
 function isMainPage() :boolean {
   const location = useLocation();
-  return location.pathname === '/' || 
-        location.pathname === '' || 
-        location.pathname === '/pages/taskcreation';
+  return location.pathname === '/' || location.pathname === '';
 }
 
 export function AppLayout() {
