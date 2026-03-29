@@ -9,7 +9,12 @@ import { AppSidebar } from './layout/sidebar';
  */
 function isMainPage() :boolean {
   const location = useLocation();
-  return location.pathname === '/' || location.pathname === '';
+  return (
+    location.pathname === '/' ||
+    location.pathname === '' ||
+    location.pathname === '/pages/taskreview' ||
+    location.pathname === '/pages/assignreview'
+  );
 }
 
 export function AppLayout() {

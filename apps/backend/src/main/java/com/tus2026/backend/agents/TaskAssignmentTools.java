@@ -1,6 +1,7 @@
 package com.tus2026.backend.agents;
 
 import com.tus2026.backend.Models.Member;
+import com.tus2026.backend.Models.Status;
 import com.tus2026.backend.Models.Task;
 import com.tus2026.backend.Repository.MemberRepository;
 import com.tus2026.backend.Repository.TaskRepository;
@@ -22,9 +23,14 @@ public class TaskAssignmentTools {
     /**
      * Captures taskId → reason for each assignment made during a single agent turn.
      * ThreadLocal ensures concurrent SSE requests don't interfere with each other.
-     * Cleared by the agent after each batch via getAndClearReasonLog().
      */
     private final ThreadLocal<Map<String, String>> reasonLog =
+            ThreadLocal.withInitial(HashMap::new);
+
+    /**
+     * Captures taskId → overCapacity flag for each assignment in a turn.
+     */
+    private final ThreadLocal<Map<String, Boolean>> overCapacityLog =
             ThreadLocal.withInitial(HashMap::new);
 
     public TaskAssignmentTools(TaskRepository taskRepository, MemberRepository memberRepository) {
@@ -32,10 +38,22 @@ public class TaskAssignmentTools {
         this.memberRepository = memberRepository;
     }
 
+    /** Computes available capacity = totalCapacity - sum of active (non-DONE) task efforts. */
+    private int computeAvailableCapacity(Member member) {
+        int used = taskRepository.findByAssigneeId(member.getId())
+                .stream()
+                .filter(t -> t.getStatus() != Status.DONE)
+                .mapToInt(Task::getEffort)
+                .sum();
+        return member.getTotalCapacity() - used;
+    }
+
     @Tool(description = """
-            Returns all team members with their skills, remaining capacity (hours), and current task count.
+            Returns all team members with their skills, total capacity, computed available capacity, and current task count.
+            availableCapacity = totalCapacity minus the sum of active (non-DONE) task efforts.
             Call this once at the start of each turn to understand the team before making assignments.
-            Only assign a task to a member whose capacity >= the task's effort in hours.
+            Prefer members where availableCapacity >= task effort, but you MAY assign to over-capacity members
+            if no better skill match exists — it will be flagged for human review.
             """)
     public String getAvailableMembers() {
         List<Member> members = memberRepository.findAll();
@@ -44,11 +62,12 @@ public class TaskAssignmentTools {
         }
         return members.stream()
                 .map(m -> {
+                    int available = computeAvailableCapacity(m);
                     int assigned = taskRepository.findByAssigneeId(m.getId()).size();
                     return String.format(
-                            "id=%s | name=%s | position=%s | capacity=%dh | assignedTasks=%d | skills=[%s]",
+                            "id=%s | name=%s | position=%s | totalCapacity=%dh | availableCapacity=%dh | assignedTasks=%d | skills=[%s]",
                             m.getId(), m.getName(), m.getPosition(),
-                            m.getAvailableCapacity(), assigned,
+                            m.getTotalCapacity(), available, assigned,
                             String.join(", ", m.getSkills()));
                 })
                 .collect(Collectors.joining("\n"));
@@ -56,7 +75,8 @@ public class TaskAssignmentTools {
 
     @Tool(description = """
             Assigns a task to a team member and saves the decision to the database.
-            Deducts the task's effort (hours) from the member's remaining capacity (floor at 0).
+            Capacity is computed dynamically — this tool does NOT deduct from a stored field.
+            Over-capacity assignments are allowed but will be flagged for human review.
             Parameters:
               - taskId: id of the task to assign
               - memberId: id of the member receiving the task
@@ -75,32 +95,38 @@ public class TaskAssignmentTools {
         Task task = taskOpt.get();
         Member member = memberOpt.get();
 
+        int availableBefore = computeAvailableCapacity(member);
+        boolean overCapacity = availableBefore < task.getEffort();
+
         task.setAssigneeId(memberId);
         taskRepository.save(task);
 
-        int newCapacity = Math.max(0, member.getAvailableCapacity() - task.getEffort());
-        member.setAvailableCapacity(newCapacity);
-        memberRepository.save(member);
-
-        // Build reason from actual assignment data only — LLM free-text is discarded to avoid hallucinated names
         String actualReason = String.format(
-                "Assigned to %s (%s) based on skills: [%s]. Task effort: %dh, remaining capacity: %dh.",
+                "Assigned to %s (%s) based on skills: [%s]. Task effort: %dh, available capacity was: %dh.%s",
                 member.getName(), member.getPosition(),
                 String.join(", ", member.getSkills()),
-                task.getEffort(), newCapacity);
+                task.getEffort(), availableBefore,
+                overCapacity ? " Note: This assignment exceeds available capacity — flagged for review." : "");
 
         reasonLog.get().put(taskId, actualReason);
+        overCapacityLog.get().put(taskId, overCapacity);
 
-        return String.format("OK: '%s' → %s | -%dh | capacity now %dh",
-                task.getTaskName(), member.getName(), task.getEffort(), newCapacity);
+        return String.format("OK: '%s' → %s | effort=%dh | available was %dh%s",
+                task.getTaskName(), member.getName(), task.getEffort(), availableBefore,
+                overCapacity ? " [OVER CAPACITY — flagged for review]" : "");
     }
 
-    /**
-     * Called by the agent after each batch to retrieve captured reasons, then clears the log.
-     */
+    /** Called by the agent after each batch to retrieve captured reasons, then clears the log. */
     public Map<String, String> getAndClearReasonLog() {
         Map<String, String> snapshot = new HashMap<>(reasonLog.get());
         reasonLog.get().clear();
+        return snapshot;
+    }
+
+    /** Called by the agent after each batch to retrieve over-capacity flags, then clears the log. */
+    public Map<String, Boolean> getAndClearOverCapacityLog() {
+        Map<String, Boolean> snapshot = new HashMap<>(overCapacityLog.get());
+        overCapacityLog.get().clear();
         return snapshot;
     }
 }

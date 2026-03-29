@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { appConfig } from '@/config/app';
 import { ModeToggle } from '@/components/mode-toggle';
+import { taskService } from '@/services/taskService';
+import { Trash2, Wand2 } from 'lucide-react';
 
 const features = [
   {
@@ -47,27 +50,53 @@ const steps = [
   {
     step: '01',
     title: 'Describe your sprint',
-    description: 'Write your sprint goals or paste an epic description into the AI prompt.',
+    description:
+      'Write your sprint goals or paste an epic description into the AI prompt.',
   },
   {
     step: '02',
     title: 'AI generates tasks',
-    description: 'Tasks are created with names, descriptions, difficulty ratings, and effort estimates.',
+    description:
+      'Tasks are created with names, descriptions, difficulty ratings, and effort estimates.',
   },
   {
     step: '03',
     title: 'Team gets assigned',
-    description: 'The AI matches each task to the best available team member by skill and capacity.',
+    description:
+      'The AI matches each task to the best available team member by skill and capacity.',
   },
   {
     step: '04',
     title: 'Track and ship',
-    description: 'Drag tasks across the board as work progresses. Capacity adjusts in real time.',
+    description:
+      'Drag tasks across the board as work progresses. Capacity adjusts in real time.',
   },
 ];
 
 export default function StartupPage() {
   const navigate = useNavigate();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleStartFresh() {
+    setClearing(true);
+    setError(null);
+    try {
+      await taskService.deleteAllTasks();
+      setDialogOpen(false);
+      navigate('/pages/taskcreation');
+    } catch {
+      setError('Failed to clear tasks. Please try again.');
+    } finally {
+      setClearing(false);
+    }
+  }
+
+  function handleKeepExisting() {
+    setDialogOpen(false);
+    navigate('/pages/taskcreation');
+  }
 
   return (
     <div className="flex flex-1 flex-col min-h-full">
@@ -78,7 +107,10 @@ export default function StartupPage() {
 
       {/* Hero */}
       <section className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-        <Badge variant="secondary" className="mb-6 px-4 py-1 text-sm font-medium">
+        <Badge
+          variant="secondary"
+          className="mb-6 px-4 py-1 text-sm font-medium"
+        >
           AI-Powered · Sprint Planning · Skill-Based Assignment
         </Badge>
 
@@ -87,17 +119,18 @@ export default function StartupPage() {
         </h1>
 
         <p className="text-muted-foreground text-lg max-w-2xl mb-10">
-          Describe your sprint goals and let AI generate tasks, assign them to the right people
-          based on skills and capacity, and track everything on a live Kanban board.
+          Describe your sprint goals and let AI generate tasks, assign them to
+          the right people based on skills and capacity, and track everything on
+          a live Kanban board.
         </p>
 
         <div className="flex gap-3 flex-wrap justify-center">
           <Button
             size="lg"
             className="px-8 text-base"
-            onClick={() => navigate('/pages/taskcreation')}
+            onClick={() => setDialogOpen(true)}
           >
-            Start a Sprint
+            Start a Demo Sprint
           </Button>
           <Button
             size="lg"
@@ -121,9 +154,13 @@ export default function StartupPage() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
           {steps.map((s) => (
             <div key={s.step} className="flex flex-col gap-3">
-              <span className="text-3xl font-extrabold text-muted-foreground/30">{s.step}</span>
+              <span className="text-3xl font-extrabold text-muted-foreground/30">
+                {s.step}
+              </span>
               <h3 className="font-semibold text-base">{s.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {s.description}
+              </p>
             </div>
           ))}
         </div>
@@ -146,7 +183,9 @@ export default function StartupPage() {
             >
               <span className="text-3xl">{f.icon}</span>
               <h3 className="font-semibold text-base">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {f.description}
+              </p>
             </div>
           ))}
         </div>
@@ -154,18 +193,71 @@ export default function StartupPage() {
 
       {/* CTA */}
       <section className="px-6 py-16 border-t text-center">
-        <h2 className="text-2xl font-bold mb-3">Ready to plan your next sprint?</h2>
+        <h2 className="text-2xl font-bold mb-3">
+          Ready to plan your next sprint?
+        </h2>
         <p className="text-muted-foreground text-sm mb-8 max-w-md mx-auto">
-          Let the AI do the heavy lifting — task creation, skill matching, and capacity planning in seconds.
+          Let the AI do the heavy lifting — task creation, skill matching, and
+          capacity planning in seconds.
         </p>
         <Button
           size="lg"
           className="px-10 text-base"
-          onClick={() => navigate('/pages/taskcreation')}
+          onClick={() => setDialogOpen(true)}
         >
-          Start a Sprint
+          Start a Demo Sprint
         </Button>
       </section>
+
+      {/* Start Sprint dialog overlay */}
+      {dialogOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && setDialogOpen(false)}
+        >
+          <div className="bg-background rounded-2xl border shadow-2xl w-full max-w-md mx-4 p-6 flex flex-col gap-5">
+            <div>
+              <h2 className="text-lg font-bold mb-1">Start a new sprint</h2>
+              <p className="text-sm text-muted-foreground">
+                Do you want to clear all existing tasks and start fresh, or keep
+                the current board and add new tasks?
+              </p>
+            </div>
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
+
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="destructive"
+                className="w-full justify-start gap-2"
+                disabled={clearing}
+                onClick={handleStartFresh}
+              >
+                <Trash2 className="h-4 w-4" />
+                {clearing
+                  ? 'Clearing tasks…'
+                  : 'Start fresh — delete all existing tasks'}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2"
+                disabled={clearing}
+                onClick={handleKeepExisting}
+              >
+                <Wand2 className="h-4 w-4" />
+                Keep existing tasks — generate more
+              </Button>
+            </div>
+
+            <button
+              onClick={() => setDialogOpen(false)}
+              className="text-xs text-muted-foreground hover:text-foreground text-center"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

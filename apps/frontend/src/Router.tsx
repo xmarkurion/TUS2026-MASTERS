@@ -6,7 +6,10 @@ import ComingSoon from './pages/ComingSoon';
 import TaskBoard from './pages/TaskBoard';
 import StartupPage from './pages/Startup';
 import TaskCreation from './pages/TaskCreation';
-import TaskList from './pages/TaskList';
+import TaskReview from './pages/TaskReview';
+import ManageTeam from './pages/ManageTeam';
+import Dashboard from './pages/Dashboard';
+import AssignReview from './pages/AssignReview';
 
 export default function Router() {
   return (
@@ -14,12 +17,15 @@ export default function Router() {
       <Route element={<AppLayout />}>
         <Route path="" element={<StartupPage />} />
         <Route path="pages">
-          <Route path="taskslist" element={<TaskList />} />
-          <Route path="taskcreation" element={<TaskCreation />} />
+<Route path="taskcreation" element={<TaskCreation />} />
+          <Route path="taskreview" element={<TaskReview />} />
           <Route path="taskboard" element={<TaskBoard />} />
           <Route path="sample" element={<Sample />} />
           <Route path="feature" element={<ComingSoon />} />
           <Route path="taskboard" element={<TaskBoard />} />
+          <Route path="manage-team" element={<ManageTeam />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="assignreview" element={<AssignReview />} />
         </Route>
         <Route path="*" element={<NotMatch />} />
       </Route>

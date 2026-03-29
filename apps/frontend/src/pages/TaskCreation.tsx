@@ -19,8 +19,8 @@ export default function TaskCreation() {
     setError(null);
 
     try {
-      await taskService.generateTasks(trimmed);
-      navigate('/pages/taskboard');
+      const tasks = await taskService.generateTasks(trimmed);
+      navigate('/pages/taskreview', { state: { tasks } });
     } catch (err) {
       setError((err as Error).message || 'Something went wrong. Please try again.');
     } finally {

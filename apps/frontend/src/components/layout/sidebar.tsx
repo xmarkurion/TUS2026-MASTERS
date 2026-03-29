@@ -13,6 +13,7 @@ import {
 import { Link } from 'react-router-dom';
 import { mainMenu } from '@/config/menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Bot } from 'lucide-react';
 
 export function AppSidebar() {
   return (
@@ -59,15 +60,15 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex items-center gap-2 p-2">
+        <Link to="/" className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors">
           <Avatar className="h-8 w-8">
-            <AvatarFallback>GK</AvatarFallback>
+            <AvatarFallback><Bot className="h-4 w-4" /></AvatarFallback>
           </Avatar>
           <div className="text-sm">
-            <p className="font-medium">Grok</p>
+            <p className="font-medium">AgileMind</p>
             <p className="text-muted-foreground text-xs">AI Project Manager</p>
           </div>
-        </div>
+        </Link>
       </SidebarFooter>
     </Sidebar>
   );
