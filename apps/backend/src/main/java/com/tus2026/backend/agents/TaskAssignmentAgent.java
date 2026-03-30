@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 @Service
 public class TaskAssignmentAgent {
 
-        private static final int BATCH_SIZE = 5;
-
         private final ChatClient chatClient;
         private final TaskAssignmentTools taskAssignmentTools;
         private final TaskRepository taskRepository;
@@ -71,8 +69,7 @@ public class TaskAssignmentAgent {
                                 return;
                         }
 
-                        while (!(batch = taskRepository.findByAssigneeIdIsNull()
-                                        .stream().limit(BATCH_SIZE).toList()).isEmpty()) {
+                        while (!(batch = taskRepository.findByAssigneeIdIsNull()).isEmpty()) {
 
                                 turnNumber++;
 

@@ -74,15 +74,21 @@ export default function AssignReview() {
     setSaveError(null);
     try {
       const approved = items.filter((i) => i.state === 'approved');
+      const rejected = items.filter((i) => i.state === 'rejected');
       const tasks = await taskService.findAllTasks();
-      await Promise.all(
-        approved.map((item) => {
+      await Promise.all([
+        ...approved.map((item) => {
           const task = tasks.find((t) => t.id === item.result.taskId);
           if (!task) return Promise.resolve();
           const assigneeId = item.overrideAssigneeId ?? item.result.assigneeId;
           return taskService.updateTask(task.id, { ...task, assigneeId });
         }),
-      );
+        ...rejected.map((item) => {
+          const task = tasks.find((t) => t.id === item.result.taskId);
+          if (!task) return Promise.resolve();
+          return taskService.updateTask(task.id, { ...task, assigneeId: null });
+        }),
+      ]);
       navigate('/pages/taskboard');
     } catch {
       setSaveError('Failed to save assignments. Please try again.');
