@@ -56,7 +56,6 @@ export default function TaskBoard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [assigning, setAssigning] = useState(false);
   const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [addForm, setAddForm] = useState<NewTaskInput>(EMPTY_TASK);
   const [addSaving, setAddSaving] = useState(false);
@@ -189,14 +188,8 @@ export default function TaskBoard() {
     }
   }
 
-  async function handleAssignAll() {
-    setAssigning(true);
-    try {
-      const results = await taskService.assignAll();
-      navigate('/pages/assignreview', { state: { results, members } });
-    } finally {
-      setAssigning(false);
-    }
+  function handleAssignAll() {
+    navigate('/pages/assignreview');
   }
 
   if (loading) return <div>Loading tasks...</div>;
@@ -209,7 +202,7 @@ export default function TaskBoard() {
           onSearch={setSearchQuery}
           onAddTask={() => setAddSheetOpen(true)}
           onAssignAll={handleAssignAll}
-          assigning={assigning}
+          assigning={false}
         />
         <Separator className="mb-4" />
         <DndContext

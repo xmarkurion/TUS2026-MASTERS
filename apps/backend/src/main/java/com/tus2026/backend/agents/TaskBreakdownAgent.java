@@ -25,9 +25,9 @@ public class TaskBreakdownAgent {
     private record TaskDto(
             String taskName,
             String taskDesc,
-            String difficulty,
-            int effort
-    ) {}
+            TaskDifficulty difficulty,
+            int effort) {
+    }
 
     private static final String SYSTEM_PROMPT = """
             You are a senior software engineering tech lead and project manager.
@@ -58,7 +58,8 @@ public class TaskBreakdownAgent {
     public TaskBreakdownAgent(ChatClient.Builder chatClientBuilder,
             TaskBreakdownTools taskBreakdownTools,
             TaskRepository taskRepository) {
-        // Build with system prompt only — tools attached per prompt call to avoid duplication
+        // Build with system prompt only — tools attached per prompt call to avoid
+        // duplication
         this.chatClient = chatClientBuilder
                 .defaultSystem(SYSTEM_PROMPT)
                 .build();
@@ -76,7 +77,8 @@ public class TaskBreakdownAgent {
                 .tools(taskBreakdownTools)
                 .user(featureDescription)
                 .call()
-                .entity(new ParameterizedTypeReference<List<TaskDto>>() {});
+                .entity(new ParameterizedTypeReference<List<TaskDto>>() {
+                });
 
         List<Task> tasks = dtos.stream().map(dto -> {
             Task task = new Task();
@@ -84,18 +86,11 @@ public class TaskBreakdownAgent {
             task.setTaskDesc(dto.taskDesc());
             task.setEffort(dto.effort());
             task.setStatus(Status.TODO);
-            task.setDifficulty(parseDifficulty(dto.difficulty()));
+            task.setDifficulty(dto.difficulty());
             return task;
         }).toList();
 
         return taskRepository.saveAll(tasks);
     }
 
-    private TaskDifficulty parseDifficulty(String value) {
-        try {
-            return TaskDifficulty.valueOf(value.toUpperCase());
-        } catch (Exception e) {
-            return TaskDifficulty.medium;
-        }
-    }
 }

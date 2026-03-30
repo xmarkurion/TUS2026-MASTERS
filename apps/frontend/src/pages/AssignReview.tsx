@@ -1,38 +1,49 @@
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { type AssignmentResult, taskService } from '@/services/taskService';
-import { type Member } from '@/services/memberService';
+import { memberService, type Member } from '@/services/memberService';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { Check, X, MessageSquare, AlertTriangle } from 'lucide-react';
+import { Check, X, MessageSquare, AlertTriangle, Loader2 } from 'lucide-react';
 
 type ReviewState = 'pending' | 'approved' | 'rejected';
 
 interface ReviewItem {
   result: AssignmentResult;
   state: ReviewState;
-  overrideAssigneeId: string | null; // null = keep original
+  overrideAssigneeId: string | null;
 }
 
 export default function AssignReview() {
-  const location = useLocation();
   const navigate = useNavigate();
 
-  const incoming: AssignmentResult[] = location.state?.results ?? [];
-  const members: Member[] = location.state?.members ?? [];
-
-  const [items, setItems] = useState<ReviewItem[]>(
-    incoming.map((r) => ({ result: r, state: 'pending', overrideAssigneeId: null })),
-  );
+  const [items, setItems] = useState<ReviewItem[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [streaming, setStreaming] = useState(true);
+  const [streamError, setStreamError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const streamStarted = useRef(false);
 
-  if (incoming.length === 0) {
-    navigate('/pages/taskboard');
-    return null;
-  }
+  useEffect(() => {
+    // Load members and start stream in parallel
+    memberService.findAllMembers().then(setMembers).catch(() => {});
+
+    if (streamStarted.current) return;
+    streamStarted.current = true;
+
+    taskService
+      .assignAll((batch) => {
+        setItems((prev) => [
+          ...prev,
+          ...batch.map((r) => ({ result: r, state: 'pending' as ReviewState, overrideAssigneeId: null })),
+        ]);
+      })
+      .catch(() => setStreamError('Assignment stream failed. Please try again.'))
+      .finally(() => setStreaming(false));
+  }, []);
 
   function approve(taskId: string) {
     setItems((prev) => prev.map((i) => i.result.taskId === taskId ? { ...i, state: 'approved' } : i));
@@ -60,10 +71,9 @@ export default function AssignReview() {
 
   async function handleConfirm() {
     setSaving(true);
-    setError(null);
+    setSaveError(null);
     try {
       const approved = items.filter((i) => i.state === 'approved');
-      // For each approved item, fetch the full task then update its assigneeId
       const tasks = await taskService.findAllTasks();
       await Promise.all(
         approved.map((item) => {
@@ -75,15 +85,15 @@ export default function AssignReview() {
       );
       navigate('/pages/taskboard');
     } catch {
-      setError('Failed to save assignments. Please try again.');
+      setSaveError('Failed to save assignments. Please try again.');
     } finally {
       setSaving(false);
     }
   }
 
-  const approved = items.filter((i) => i.state === 'approved').length;
-  const rejected = items.filter((i) => i.state === 'rejected').length;
-  const pending = items.filter((i) => i.state === 'pending').length;
+  const approvedCount = items.filter((i) => i.state === 'approved').length;
+  const rejectedCount = items.filter((i) => i.state === 'rejected').length;
+  const pendingCount = items.filter((i) => i.state === 'pending').length;
 
   return (
     <div className="flex flex-col flex-1 px-6 py-8 max-w-4xl mx-auto w-full">
@@ -97,17 +107,29 @@ export default function AssignReview() {
 
       {/* Summary bar */}
       <div className="flex items-center gap-4 text-sm mb-4 flex-wrap">
-        <span className="text-muted-foreground">{items.length} assignments</span>
-        <span className="text-green-600 dark:text-green-400 font-medium">{approved} approved</span>
-        <span className="text-red-600 dark:text-red-400 font-medium">{rejected} rejected</span>
-        <span className="text-muted-foreground">{pending} pending</span>
+        <span className="text-muted-foreground">{items.length} assignments{streaming ? '…' : ''}</span>
+        <span className="text-green-600 dark:text-green-400 font-medium">{approvedCount} approved</span>
+        <span className="text-red-600 dark:text-red-400 font-medium">{rejectedCount} rejected</span>
+        <span className="text-muted-foreground">{pendingCount} pending</span>
         <div className="ml-auto flex gap-2">
-          <Button size="sm" variant="outline" onClick={approveAll} disabled={pending === 0}>Approve all</Button>
-          <Button size="sm" variant="outline" onClick={rejectAll} disabled={pending === 0}>Reject all</Button>
+          <Button size="sm" variant="outline" onClick={approveAll} disabled={pendingCount === 0}>Approve all</Button>
+          <Button size="sm" variant="outline" onClick={rejectAll} disabled={pendingCount === 0}>Reject all</Button>
         </div>
       </div>
 
       <Separator className="mb-6" />
+
+      {/* Empty state while first batch loads */}
+      {streaming && items.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p className="text-sm">AI is assigning tasks…</p>
+        </div>
+      )}
+
+      {streamError && (
+        <p className="text-destructive text-sm mb-4">{streamError}</p>
+      )}
 
       {/* Items */}
       <div className="flex flex-col gap-4 mb-8">
@@ -188,7 +210,6 @@ export default function AssignReview() {
                   </span>
                 </div>
 
-                {/* Change assignee dropdown */}
                 {item.state !== 'rejected' && members.length > 0 && (
                   <select
                     value={item.overrideAssigneeId ?? item.result.assigneeId}
@@ -206,19 +227,27 @@ export default function AssignReview() {
             </div>
           );
         })}
+
+        {/* Streaming indicator after existing items */}
+        {streaming && items.length > 0 && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+            <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+            Loading more assignments…
+          </div>
+        )}
       </div>
 
-      {error && <p className="text-destructive text-sm mb-4">{error}</p>}
+      {saveError && <p className="text-destructive text-sm mb-4">{saveError}</p>}
 
       <div className="flex justify-between items-center">
         <Button variant="ghost" onClick={() => navigate(-1)}>← Back</Button>
         <Button
           size="lg"
           className="px-8"
-          disabled={saving || approved === 0}
+          disabled={saving || approvedCount === 0}
           onClick={handleConfirm}
         >
-          {saving ? 'Saving…' : `Confirm ${approved} assignment${approved !== 1 ? 's' : ''} →`}
+          {saving ? 'Saving…' : `Confirm ${approvedCount} assignment${approvedCount !== 1 ? 's' : ''} →`}
         </Button>
       </div>
     </div>

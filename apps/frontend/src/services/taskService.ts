@@ -67,13 +67,12 @@ export const taskService = {
     return await response.json();
   },
 
-  assignAll: async (): Promise<AssignmentResult[]> => {
+  assignAll: async (onBatch: (batch: AssignmentResult[]) => void): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/agents/tasks/assign/stream`, {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Assignment stream failed');
 
-    const results: AssignmentResult[] = [];
     const reader = response.body!.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -93,16 +92,16 @@ export const taskService = {
         } else if (line.startsWith('data:')) {
           const data = line.slice(5).trim();
           if (eventType === 'batch') {
-            try { results.push(...JSON.parse(data)); } catch { /* ignore */ }
+            try { onBatch(JSON.parse(data)); } catch { /* ignore */ }
           } else if (eventType === 'done' || eventType === 'warning') {
             reader.cancel();
-            return results;
+            return;
           }
+        } else if (line.trim() === '') {
           eventType = '';
         }
       }
     }
-    return results;
   },
 
   generateTasks: async (epicDescription: string): Promise<Task[]> => {
