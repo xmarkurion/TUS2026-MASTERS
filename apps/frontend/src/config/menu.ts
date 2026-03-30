@@ -1,4 +1,4 @@
-import { Brain, Settings, LucideIcon } from 'lucide-react';
+import { Brain, Wand2, Kanban, Users, LucideIcon } from 'lucide-react';
 
 type MenuItemType = {
   title: string;
@@ -12,35 +12,22 @@ type MenuType = MenuItemType[];
 export const mainMenu: MenuType = [
   {
     title: 'AI Dashboard',
-    url: '/',
+    url: '/pages/dashboard',
     icon: Brain,
   },
   {
-    title: 'Workspace',
-    url: '/workspace',
-
-    items: [
-      {
-        title: 'Task List',
-        url: '/pages/taskslist',
-      },
-      {
-        title: 'Task Board',
-        url: '/pages/taskboard',
-      },
-      {
-        title: 'Projects',
-        url: '/pages/projects',
-      },
-      {
-        title: 'Manage Team',
-        url: '/pages/manage-team',
-      },
-    ],
+    title: 'Generate Tasks',
+    url: '/pages/taskcreation',
+    icon: Wand2,
   },
   {
-    title: 'Settings',
-    url: '/settings',
-    icon: Settings,
+    title: 'Task Board',
+    url: '/pages/taskboard',
+    icon: Kanban,
+  },
+  {
+    title: 'Manage Team',
+    url: '/pages/manage-team',
+    icon: Users,
   },
 ];

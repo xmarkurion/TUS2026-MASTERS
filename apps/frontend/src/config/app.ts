@@ -11,9 +11,9 @@ type AppConfigType = {
 };
 
 export const appConfig: AppConfigType = {
-  name: import.meta.env.VITE_APP_NAME ?? 'TaskFlow',
+  name: import.meta.env.VITE_APP_NAME ?? 'AgileMind',
   github: {
-    title: 'AI Task Manager',
+    title: 'AI Project Manager',
     url: 'https://github.com/xmarkurion/TUS2026-MASTERS',
   },
   author: {

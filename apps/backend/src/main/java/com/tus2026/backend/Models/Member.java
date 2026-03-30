@@ -16,7 +16,7 @@ import java.util.List;
 public class Member {
 
     @Id
-    private String id; // EMP-003
+    private String id;
     @Field("person_name")
     private String name;
     @Field("position")
@@ -25,6 +25,10 @@ public class Member {
     private String personalBackground;
     @Field("skills")
     private List<String> skills;
-    @Field("available_capacity")
-    private int availableCapacity;
+    /**
+     * Fixed total capacity for the member (e.g. 10 story points per sprint).
+     * Available capacity is computed dynamically from active task efforts.
+     */
+    @Field("total_capacity")
+    private int totalCapacity = 10;
 }

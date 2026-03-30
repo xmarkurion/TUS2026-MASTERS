@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 @Service
 public class TaskAssignmentAgent {
 
-        private static final int BATCH_SIZE = 5;
-
         private final ChatClient chatClient;
         private final TaskAssignmentTools taskAssignmentTools;
         private final TaskRepository taskRepository;
@@ -37,9 +35,10 @@ public class TaskAssignmentAgent {
                         2. For each task provided in the message, choose the best member based on:
                            - Skill match with the task description
                            - Task difficulty vs member seniority/position
-                           - Member capacity must be >= task effort — skip the task if no one qualifies
+                           - Prefer members where availableCapacity >= task effort
+                           - You MAY assign to a member whose availableCapacity < task effort if they are the best skill match and no one else qualifies — it will be flagged for human review
                            - Prefer members with fewer assigned tasks when skills are equal
-                        3. Call assignTaskToMember for each task you can assign
+                        3. Call assignTaskToMember for each task — always assign all tasks, never skip
                         """;
 
         public TaskAssignmentAgent(ChatClient.Builder chatClientBuilder,
@@ -61,23 +60,19 @@ public class TaskAssignmentAgent {
                         List<Task> batch;
                         int turnNumber = 0;
 
-                        while (!(batch = taskRepository.findByAssigneeIdIsNull()
-                                        .stream().limit(BATCH_SIZE).toList()).isEmpty()) {
+                        // Stop if there are no members at all
+                        if (memberRepository.findAll().isEmpty()) {
+                                emitter.send(SseEmitter.event()
+                                                .name("warning")
+                                                .data("No team members found. Add team members before assigning tasks."));
+                                emitter.complete();
+                                return;
+                        }
+
+                        while (!(batch = taskRepository.findByAssigneeIdIsNull()).isEmpty()) {
 
                                 turnNumber++;
-                                // Checks if we have any memeber with capacity >= the minimum effort task in the
-                                // batch before calling the agent, to avoid unnecessary LLM calls when we know
-                                // no assignments can be made
-                                int minEffort = batch.stream().mapToInt(Task::getEffort).min().orElse(1);
-                                boolean anyoneAvailable = memberRepository.findAll().stream()
-                                                .anyMatch(m -> m.getAvailableCapacity() >= minEffort);
 
-                                if (!anyoneAvailable) {
-                                        emitter.send(SseEmitter.event()
-                                                        .name("warning")
-                                                        .data("No suitable people found: no member has sufficient capacity for the remaining tasks."));
-                                        break;
-                                }
                                 chatClient
                                                 .prompt()
                                                 .tools(taskAssignmentTools)
@@ -86,6 +81,7 @@ public class TaskAssignmentAgent {
                                                 .content();
 
                                 Map<String, String> reasons = taskAssignmentTools.getAndClearReasonLog();
+                                Map<String, Boolean> overCapacityMap = taskAssignmentTools.getAndClearOverCapacityLog();
 
                                 if (reasons.isEmpty()) {
                                         emitter.send(SseEmitter.event()
@@ -99,6 +95,7 @@ public class TaskAssignmentAgent {
                                                 .map(entry -> {
                                                         String taskId = entry.getKey();
                                                         String reason = entry.getValue();
+                                                        boolean overCapacity = overCapacityMap.getOrDefault(taskId, false);
                                                         return taskRepository.findById(taskId)
                                                                         .filter(t -> t.getAssigneeId() != null)
                                                                         .flatMap(t -> memberRepository
@@ -108,7 +105,8 @@ public class TaskAssignmentAgent {
                                                                                                         t.getTaskName(),
                                                                                                         m.getId(),
                                                                                                         m.getName(),
-                                                                                                        reason)))
+                                                                                                        reason,
+                                                                                                        overCapacity)))
                                                                         .orElse(null);
                                                 })
                                                 .filter(Objects::nonNull)
@@ -131,14 +129,8 @@ public class TaskAssignmentAgent {
                 Task task = taskRepository.findById(taskId)
                                 .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
-                int minEffort = task.getEffort();
-                boolean anyoneAvailable = memberRepository.findAll().stream()
-                                .anyMatch(m -> m.getAvailableCapacity() >= minEffort);
-
-                if (!anyoneAvailable) {
-                        throw new IllegalStateException(
-                                        "No suitable people found: no member has sufficient capacity for this task ("
-                                                        + minEffort + "h).");
+                if (memberRepository.findAll().isEmpty()) {
+                        throw new IllegalStateException("No team members found.");
                 }
 
                 chatClient
@@ -149,6 +141,7 @@ public class TaskAssignmentAgent {
                                 .content();
 
                 Map<String, String> reasons = taskAssignmentTools.getAndClearReasonLog();
+                Map<String, Boolean> overCapacityMap = taskAssignmentTools.getAndClearOverCapacityLog();
 
                 Task updated = taskRepository.findById(taskId)
                                 .orElseThrow(() -> new IllegalStateException("Task disappeared after assignment."));
@@ -158,10 +151,11 @@ public class TaskAssignmentAgent {
                 }
 
                 String reason = reasons.getOrDefault(taskId, "Assigned by AI agent.");
+                boolean overCapacity = overCapacityMap.getOrDefault(taskId, false);
                 return memberRepository.findById(updated.getAssigneeId())
                                 .map(m -> new AssignmentResult(
                                                 updated.getId(), updated.getTaskName(),
-                                                m.getId(), m.getName(), reason))
+                                                m.getId(), m.getName(), reason, overCapacity))
                                 .orElseThrow(() -> new IllegalStateException("Assigned member not found in DB."));
         }
 

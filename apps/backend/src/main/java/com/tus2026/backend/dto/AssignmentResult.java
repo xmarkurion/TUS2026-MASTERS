@@ -5,5 +5,6 @@ public record AssignmentResult(
         String taskName,
         String assigneeId,
         String assigneeName,
-        String reasonForAssignment
+        String reasonForAssignment,
+        boolean overCapacity
 ) {}

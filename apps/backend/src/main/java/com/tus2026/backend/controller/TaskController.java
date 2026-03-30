@@ -80,6 +80,16 @@ public class TaskController {
         }
     }
 
+    @DeleteMapping("/deleteAll")
+    public ResponseEntity<String> deleteAllTasks(){
+        try{
+            repo.deleteAll();
+            return ResponseEntity.status(200).body("All tasks deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error deleting all tasks: " + e.getMessage());
+        }
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteTask(@PathVariable String id){
         try{
