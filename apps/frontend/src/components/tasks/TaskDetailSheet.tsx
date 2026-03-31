@@ -55,6 +55,7 @@ export function TaskDetailSheet({ task, members, open, onOpenChange, onUpdate, o
       taskDesc: task!.taskDesc,
       difficulty: task!.difficulty,
       effort: task!.effort,
+      assigneeId: task!.assigneeId,
     });
     setEditing(true);
   }

@@ -19,7 +19,7 @@ export interface Task {
   taskName: string;
   difficulty: TaskDifficulty;
   taskDesc: string;
-  assigneeId: string;
+  assigneeId: string | null;
   effort: number;
   // Instants are serialized as ISO 8601 strings in JSON (e.g., '2026-03-06T08:21:37.667Z')
   createdAt: string; 
