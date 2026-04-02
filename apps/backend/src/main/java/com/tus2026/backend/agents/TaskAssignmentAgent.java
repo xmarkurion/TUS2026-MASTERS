@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 @Service
 public class TaskAssignmentAgent {
 
+        private static final int BATCH_SIZE = 5;
+
         private final ChatClient chatClient;
         private final TaskAssignmentTools taskAssignmentTools;
         private final TaskRepository taskRepository;
@@ -69,7 +71,8 @@ public class TaskAssignmentAgent {
                                 return;
                         }
 
-                        while (!(batch = taskRepository.findByAssigneeIdIsNull()).isEmpty()) {
+                        while (!(batch = taskRepository.findByAssigneeIdIsNull()
+                                        .stream().limit(BATCH_SIZE).toList()).isEmpty()) {
 
                                 turnNumber++;
 
@@ -95,7 +98,8 @@ public class TaskAssignmentAgent {
                                                 .map(entry -> {
                                                         String taskId = entry.getKey();
                                                         String reason = entry.getValue();
-                                                        boolean overCapacity = overCapacityMap.getOrDefault(taskId, false);
+                                                        boolean overCapacity = overCapacityMap.getOrDefault(taskId,
+                                                                        false);
                                                         return taskRepository.findById(taskId)
                                                                         .filter(t -> t.getAssigneeId() != null)
                                                                         .flatMap(t -> memberRepository
