@@ -1,6 +1,6 @@
-import { Tasks, User } from './types';
+import { User } from './types';
 
-export const tasks: Tasks[] = [
+export const tasks = [
   {
     id: '65c1a2f9e13a9b7c4f1a0001',
     title: 'Setup project repository',
