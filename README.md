@@ -1,5 +1,26 @@
-# TUS2026 Masters
+# TUS2026 Masters - AI-Driven Project Management : Automated Project Management Using Large Language Models
+Full-stack, AI-powered project management web application designed to automate resource management and sprint planning in Agile software development. By replacing subjective, manager-led task assignments with a prompt-driven allocation mechanism, structurally removes manual cognitive biases (like affinity bias and the availability heuristic) to deliver fairer, data-driven task distribution.
 
+# Process
+AgileMind processes software project workflows through three sequential automated stages:
+
+- Stage 1: Task Generation 
+Project leads input a high-level goal. The system leverages Spring AI and an LLM to generate structured tasks complete with name, description, difficulty, and estimated effort.
+
+- Stage 2: Task De-Duplication 
+An autonomous agent reviews the newly created tasks against the existing MongoDB backlog collection, automatically removing duplicates to keep data clean.
+
+- Stage 3: Task Allocation 
+The system maps task complexity and required technologies against developer profiles, recommending the absolute best team member for the job without manual bias.
+
+# Key Features
+- Automated Task Generation: Decomposes high-level natural language project goals or feature requests into discrete, actionable backlog tasks.
+- Semantic De-Duplication: Uses an intelligent De-Duplication Agent to clean the backlog and purge redundant tasks before sprint allocation.
+- Competency-Based Task Allocation: Automatically matches task requirements with developer profiles based on verifiable technical skills, current workload, and real-time hour availability.
+- Flexible LLM Inference:  cloud-based models (Google Gemini API -> high reasoning)
+- And locally deployed open-source models (Gemma3-12b via LM Studio -> limited reasoning).
+
+# Tech:
 TUS2026 Masters is a full-stack project with:
 - **Backend**: Spring Boot REST API (`apps/backend`)
 - **Frontend**: React + Vite UI (`apps/frontend`)
