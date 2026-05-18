@@ -1,6 +1,14 @@
 # TUS2026 Masters - AI-Driven Project Management : Automated Project Management Using Large Language Models
 Full-stack, AI-powered project management web application designed to automate resource management and sprint planning in Agile software development. By replacing subjective, manager-led task assignments with a prompt-driven allocation mechanism, structurally removes manual cognitive biases (like affinity bias and the availability heuristic) to deliver fairer, data-driven task distribution.
 
+# Demo Video
+<div align="center">
+  <video src="documentation/demo.mp4" width="100%" poster="documentation/poster.png" controls preload="metadata">
+    <p>Your browser doesn't support HTML5 video. Here is a <a href="documentation/demo.mp4">link to the video</a> instead.</p>
+  </video>
+</div>
+[![Watch the Demo](documentation/screenshot.png)](documentation/demo.mp4)
+
 # Process
 AgileMind processes software project workflows through three sequential automated stages:
 
