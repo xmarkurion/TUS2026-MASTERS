@@ -2,7 +2,8 @@
 Full-stack, AI-powered project management web application designed to automate resource management and sprint planning in Agile software development. By replacing subjective, manager-led task assignments with a prompt-driven allocation mechanism, structurally removes manual cognitive biases (like affinity bias and the availability heuristic) to deliver fairer, data-driven task distribution.
 
 # Demo Video
-![AgileMind Demo](documentation/demo.mp4)
+![Demo](documentation/gif.gif)
+![Full video Demo](documentation/demo.mp4)
 
 # Process
 AgileMind processes software project workflows through three sequential automated stages:
